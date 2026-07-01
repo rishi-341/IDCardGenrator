@@ -36,7 +36,7 @@ barcode/
 *.xlsx
 *.xls
 
-# Photo folders (large, runtime data)
+# Photo folders (large, runtime data — student photos, NOT asset files)
 FINAL B A SEM 1/
 FINAL BCOM SEM 1/
 BS BBA SEM 1 PHOTO/
@@ -45,6 +45,9 @@ FINAL MA 1 PHOTO/
 MCOM SEM-1 PHOTO/
 TEMP BA SEM 1/
 jpg/
+
+# Student photo ZIPs
+*.zip
 
 # OS noise
 Thumbs.db

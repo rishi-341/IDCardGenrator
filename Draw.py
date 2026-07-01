@@ -23,13 +23,19 @@ black = colors.black
 red = colors.red
 
 
-# Optimize the slogo.png
-slogo_img = Image.open("slogo.png")
-slogo_img.thumbnail((100, 100)) # Resize to 100x100 pixels
-slogo_buffer = BytesIO()
-slogo_img.save(slogo_buffer, format='PNG', quality=85)
-slogo_buffer.seek(0)
-slogo_reader = ImageReader(slogo_buffer)
+# Optimize the slogo.png — loaded lazily so imports don't fail if file is absent
+slogo_reader = None
+
+def _load_slogo():
+    global slogo_reader
+    if slogo_reader is None:
+        slogo_img = Image.open("slogo.png")
+        slogo_img.thumbnail((100, 100))
+        slogo_buffer = BytesIO()
+        slogo_img.save(slogo_buffer, format='PNG', quality=85)
+        slogo_buffer.seek(0)
+        slogo_reader = ImageReader(slogo_buffer)
+    return slogo_reader
 
 # img_sign = Image.open("sign.png")
 # img_sign.thumbnail((150, 150)) # Compress
