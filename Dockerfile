@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzbar0 \
         libzbar-dev \
         libglib2.0-0 \
-        libgl1-mesa-glx \
+        libgl1 \
         gcc \
     && rm -rf /var/lib/apt/lists/*
 
