@@ -13,3 +13,6 @@
 !*.js
 !*.css
 !*.html
+!requirements.txt
+!Dockerfile
+!.dockerignore
