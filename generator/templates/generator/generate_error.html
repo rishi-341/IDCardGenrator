@@ -1,0 +1,30 @@
+{% extends 'generator/base.html' %}
+{% block title %}Generation Error — ID Card Generator{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-title" style="color:var(--danger)">
+    <i class="fa-solid fa-circle-exclamation"></i> PDF Generation Failed
+  </div>
+  <div class="card-subtitle">An error occurred while generating the ID cards PDF.</div>
+
+  <div class="alert alert-danger">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>Check that all image paths exist and asset files (slogo.png, sign.png, bg.png, bg2.png, trans-sign.png) are present in the project folder.</span>
+  </div>
+
+  <div class="gen-error-log" style="margin-bottom:1.5rem">{{ error }}</div>
+
+  <div style="display:flex; gap:.85rem; flex-wrap:wrap">
+    <a href="{% url 'design_select' %}" class="btn btn-primary">
+      <i class="fa-solid fa-rotate-left"></i> Try Again
+    </a>
+    <a href="{% url 'preview' %}" class="btn btn-outline">
+      <i class="fa-solid fa-arrow-left"></i> Back to Preview
+    </a>
+    <a href="{% url 'upload' %}" class="btn btn-ghost">
+      <i class="fa-solid fa-house"></i> Start Over
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ID Card Generator{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="{% static 'generator/css/style.css' %}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">
+      <i class="fa-solid fa-id-card"></i>
+      <span>ID Card Generator</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a href="{% url 'home' %}"   class="nav-link {% if request.resolver_match.url_name == 'home'   %}active{% endif %}">
+        <i class="fa-solid fa-house"></i> Home
+      </a>
+      <a href="{% url 'upload' %}" class="nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+        <i class="fa-solid fa-upload"></i> Upload
+      </a>
+      <a href="{% url 'clear_cache' %}" class="nav-link danger"
+         onclick="return confirm('Clear all uploaded files and generated PDFs?')">
+        <i class="fa-solid fa-trash-can"></i> Clear Cache
+      </a>
+    </div>
+  </nav>
+
+  {% block stepper %}{% endblock %}
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    Bhavan's Sheth R. A. College &nbsp;&middot;&nbsp; ID Card Generator
+  </footer>
+
+  <script src="{% static 'generator/js/main.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

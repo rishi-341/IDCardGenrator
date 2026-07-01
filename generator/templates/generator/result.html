@@ -1,0 +1,113 @@
+{% extends 'generator/base.html' %}
+{% block title %}PDF Ready — ID Card Generator{% endblock %}
+
+{% block stepper %}
+<div class="stepper">
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Upload</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Map Fields</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Preview</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Design</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Generate</span></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="result-hero">
+    <div class="result-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="result-title">PDF is Ready</div>
+    <p class="result-sub">ID cards generated successfully. Preview below or download the PDF.</p>
+    <div class="result-stats">
+      <div class="stat-item">
+        <div class="stat-num">{{ row_count }}</div>
+        <div class="stat-label">Cards</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">{{ pdf_size_kb }} KB</div>
+        <div class="stat-label">File Size</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" style="font-size:1rem; padding-top:.4rem">{{ design_id }}</div>
+        <div class="stat-label">Design</div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <a href="{% url 'download_pdf' %}" class="btn btn-success btn-lg">
+        <i class="fa-solid fa-download"></i> Download PDF
+      </a>
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-upload"></i> New Batch
+      </a>
+      <a href="{% url 'clear_cache' %}" class="btn btn-outline"
+         onclick="return confirm('Delete all uploaded files and generated PDFs?')">
+        <i class="fa-solid fa-trash-can"></i> Clear &amp; Reset
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="padding:1.5rem">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:.75rem">
+    <div>
+      <div class="card-title" style="margin-bottom:.1rem"><i class="fa-solid fa-file-pdf"></i> PDF Preview</div>
+      <div style="font-size:.83rem; color:var(--gray-400)">Scroll to review all cards before printing</div>
+    </div>
+    <a href="{% url 'download_pdf' %}" class="btn btn-success btn-sm">
+      <i class="fa-solid fa-download"></i> Download
+    </a>
+  </div>
+
+  <div id="pdf-loading" class="pdf-loading-box">
+    <div class="spinner" style="width:36px;height:36px;border-width:4px"></div>
+    <span style="color:var(--gray-400);font-size:.88rem">Loading preview...</span>
+  </div>
+
+  <div class="pdf-preview-wrap" id="pdf-preview-wrap" style="display:none">
+    <iframe id="pdf-iframe" class="pdf-iframe" title="ID Cards PDF Preview"></iframe>
+  </div>
+  <div class="pdf-preview-note" id="pdf-preview-note" style="display:none">
+    Preview not loading?
+    <a href="{% url 'view_pdf' %}" target="_blank">Open in new tab</a> or
+    <a href="{% url 'download_pdf' %}">download the PDF</a>.
+  </div>
+</div>
+
+<span id="pdf-fetch-url" data-url="{% url 'view_pdf' %}" style="display:none"></span>
+
+<div class="card" style="background:var(--sky-pale); border:1px solid var(--sky-light)">
+  <div class="card-title" style="font-size:.95rem"><i class="fa-solid fa-circle-info"></i> Summary</div>
+  <div class="info-bar" style="margin-bottom:0">
+    <div class="ib-item"><i class="fa-solid fa-file-excel"></i> <span>Source:</span> <span class="ib-val">{{ excel_name }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-palette"></i> <span>Design:</span> <span class="ib-val">{{ design_id }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-users"></i> <span>Students:</span> <span class="ib-val">{{ row_count }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-weight-hanging"></i> <span>PDF size:</span> <span class="ib-val">{{ pdf_size_kb }} KB</span></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var pdfUrl = document.getElementById('pdf-fetch-url').dataset.url;
+fetch(pdfUrl)
+  .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+  .then(function(blob) {
+    var blobUrl = URL.createObjectURL(blob);
+    var iframe  = document.getElementById('pdf-iframe');
+    iframe.src  = blobUrl;
+    iframe.onload = function() {
+      document.getElementById('pdf-loading').style.display      = 'none';
+      document.getElementById('pdf-preview-wrap').style.display = 'block';
+      document.getElementById('pdf-preview-note').style.display = 'block';
+    };
+  })
+  .catch(function() {
+    document.getElementById('pdf-loading').innerHTML =
+      '<span style="color:var(--danger)"><i class="fa-solid fa-circle-exclamation"></i> ' +
+      'Could not load preview. <a href="' + pdfUrl + '" target="_blank">Open in new tab</a>.</span>';
+  });
+</script>
+{% endblock %}

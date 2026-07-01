@@ -1,18 +1,45 @@
-# Ignore all files
-*
-*.png
-*.jpg
-*.JPG
-*.jpeg
-*.JPEG
-*.PNG
+# ── Python cache ──────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# But allow specific extensions/files (the "!" means "don't ignore")
-!*.py
-!.gitignore
-!*.js
-!*.css
-!*.html
-!requirements.txt
-!Dockerfile
-!.dockerignore
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Django generated ──────────────────────────────────────────────────────────
+staticfiles/
+media/
+
+# ── Barcode output (runtime) ──────────────────────────────────────────────────
+barcode/
+
+# ── Student data — never commit real data ─────────────────────────────────────
+*.xlsx
+*.xls
+*.pdf
+
+# ── Student photos (large binary assets) ─────────────────────────────────────
+*.jpg
+*.jpeg
+*.JPG
+*.JPEG
+# keep design asset PNGs (slogo.png, bg.png etc) — exclude only photo folders
+FINAL B A SEM 1/
+FINAL BCOM SEM 1/
+BS BBA SEM 1 PHOTO/
+B J M C PHOTOS/
+FINAL MA 1 PHOTO/
+MCOM SEM-1 PHOTO/
+TEMP BA SEM 1/
+jpg/
+*.zip
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

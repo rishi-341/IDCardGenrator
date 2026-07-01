@@ -1,0 +1,76 @@
+{% extends 'generator/base.html' %}
+{% block title %}Choose Design — ID Card Generator{% endblock %}
+
+{% block stepper %}
+<div class="stepper">
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Upload</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Map Fields</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Preview</span></div>
+  <div class="step-sep"></div>
+  <div class="step active"><div class="step-num">4</div><span>Design</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">5</div><span>Generate</span></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-title"><i class="fa-solid fa-palette"></i> Choose ID Card Design</div>
+  <div class="card-subtitle">Select the layout for your ID cards. Different courses can have different designs.</div>
+
+  <div class="info-bar">
+    <div class="ib-item"><i class="fa-solid fa-file-excel"></i> <span>File:</span> <span class="ib-val">{{ excel_name }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-users"></i> <span>Rows:</span> <span class="ib-val">{{ row_count }}</span></div>
+    {% if detected_courses %}
+    <div class="ib-item">
+      <i class="fa-solid fa-graduation-cap"></i> <span>Courses:</span>
+      {% for c in detected_courses %}<span class="required-badge">{{ c }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if detected_courses %}
+  <div class="alert alert-info">
+    <i class="fa-solid fa-circle-info"></i>
+    <span>Found <strong>{{ detected_courses|length }}</strong> course(s). The <strong>Auto-detect</strong> option selects the right layout per student based on their <code>CourseName</code> field.</span>
+  </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'design_select' %}">
+    {% csrf_token %}
+    <div class="design-grid">
+      {% for d in design_choices %}
+      <label class="design-card {% if forloop.last %}selected{% endif %}" for="design_{{ d.id }}">
+        <input type="radio" name="design_id" id="design_{{ d.id }}" value="{{ d.id }}"
+               {% if forloop.last %}checked{% endif %}/>
+        <div class="design-check"><i class="fa-solid fa-check"></i></div>
+        <div class="design-icon">
+          {% if d.id == 'landscape' %}<i class="fa-regular fa-address-card"></i>
+          {% elif d.id == 'auto' %}<i class="fa-solid fa-wand-magic-sparkles"></i>
+          {% else %}<i class="fa-solid fa-address-card"></i>{% endif %}
+        </div>
+        <div class="design-label">{{ d.label }}</div>
+        <div class="design-courses">
+          {% if d.courses %}
+            {% for c in d.courses %}{{ c }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          {% else %}
+            {% if d.id == 'auto' %}All courses auto-mapped{% else %}Any course{% endif %}
+          {% endif %}
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div style="display:flex; gap:.85rem; margin-top:2rem; flex-wrap:wrap">
+      <a href="{% url 'preview' %}" class="btn btn-outline">
+        <i class="fa-solid fa-arrow-left"></i> Back to Preview
+      </a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-bolt"></i> Generate PDF
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

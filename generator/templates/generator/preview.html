@@ -1,0 +1,117 @@
+{% extends 'generator/base.html' %}
+{% load generator_extras %}
+{% block title %}Preview &amp; Edit — ID Card Generator{% endblock %}
+
+{% block stepper %}
+<div class="stepper">
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Upload</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Map Fields</span></div>
+  <div class="step-sep"></div>
+  <div class="step active"><div class="step-num">3</div><span>Preview</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">4</div><span>Design</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">5</div><span>Generate</span></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="padding-bottom:1rem">
+  <div class="card-title"><i class="fa-solid fa-table-list"></i> Preview &amp; Edit Student Data</div>
+  <div class="card-subtitle">Review all records. Click Edit on any row to fix values before generating.</div>
+
+  <div class="info-bar">
+    <div class="ib-item"><i class="fa-solid fa-file-excel"></i> <span>File:</span> <span class="ib-val">{{ excel_name }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-users"></i> <span>Total rows:</span> <span class="ib-val">{{ total_rows }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-file-lines"></i> <span>Page:</span> <span class="ib-val">{{ page }} / {{ total_pages }}</span></div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          {% for col in columns %}<th>{{ col }}</th>{% endfor %}
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="roll">{{ row.row_idx|add:1 }}</td>
+          {% for col in columns %}
+          <td title="{{ row|get_item:col }}">{{ row|get_item:col|truncatechars:28 }}</td>
+          {% endfor %}
+          <td class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="openEditModal({{ row.row_idx }})">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="?page=1" class="page-btn"><i class="fa-solid fa-angles-left"></i></a>
+      <a href="?page={{ page|add:-1 }}" class="page-btn"><i class="fa-solid fa-angle-left"></i> Prev</a>
+    {% else %}
+      <span class="page-btn disabled"><i class="fa-solid fa-angles-left"></i></span>
+      <span class="page-btn disabled"><i class="fa-solid fa-angle-left"></i> Prev</span>
+    {% endif %}
+
+    {% for p in page_range %}
+      {% if p == page %}
+        <span class="page-btn active">{{ p }}</span>
+      {% elif p == '...' %}
+        <span class="page-btn disabled">&hellip;</span>
+      {% else %}
+        <a href="?page={{ p }}" class="page-btn">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <a href="?page={{ page|add:1 }}" class="page-btn">Next <i class="fa-solid fa-angle-right"></i></a>
+      <a href="?page={{ total_pages }}" class="page-btn"><i class="fa-solid fa-angles-right"></i></a>
+    {% else %}
+      <span class="page-btn disabled">Next <i class="fa-solid fa-angle-right"></i></span>
+      <span class="page-btn disabled"><i class="fa-solid fa-angles-right"></i></span>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding:1.1rem 1.75rem">
+  <div>
+    <div style="font-weight:700; color:var(--gray-800)">Ready to continue?</div>
+    <div style="font-size:.83rem; color:var(--gray-400)">You can still edit rows before moving on.</div>
+  </div>
+  <div style="display:flex; gap:.75rem; flex-wrap:wrap">
+    <a href="{% url 'map_fields' %}" class="btn btn-outline">
+      <i class="fa-solid fa-arrow-left"></i> Re-map Fields
+    </a>
+    <a href="{% url 'design_select' %}" class="btn btn-primary btn-lg">
+      <i class="fa-solid fa-arrow-right"></i> Choose Design
+    </a>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Edit Student Record</div>
+      <button class="modal-close" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="modal-fields" class="modal-grid"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditModal()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

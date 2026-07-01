@@ -1,0 +1,106 @@
+{% extends 'generator/base.html' %}
+{% block title %}Generating PDF — ID Card Generator{% endblock %}
+
+{% block stepper %}
+<div class="stepper">
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Upload</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Map Fields</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Preview</span></div>
+  <div class="step-sep"></div>
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Design</span></div>
+  <div class="step-sep"></div>
+  <div class="step active"><div class="step-num">5</div><span>Generate</span></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card gen-wrap">
+  <div class="gen-ring-wrap" id="gen-icon-wrap">
+    <div class="gen-ring"></div>
+  </div>
+
+  <h2 class="gen-title" id="gen-title">Generating ID Cards...</h2>
+  <p class="gen-sub" id="gen-sub">
+    Processing <strong>{{ row_count }}</strong> record{{ row_count|pluralize }}.
+    This may take a minute for large batches.
+  </p>
+
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Starting up...</div>
+  </div>
+
+  <div id="gen-error-log" class="gen-error-log" style="display:none"></div>
+
+  <div id="gen-error-actions" style="display:none; margin-top:1.5rem; gap:.85rem; justify-content:center; flex-wrap:wrap">
+    <a href="/design/" class="btn btn-primary"><i class="fa-solid fa-rotate-left"></i> Try Again</a>
+    <a href="/upload/" class="btn btn-outline"><i class="fa-solid fa-house"></i> Start Over</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var STEPS = [
+  { pct: 10, label: 'Reading student data...' },
+  { pct: 28, label: 'Generating barcodes...' },
+  { pct: 52, label: 'Rendering ID card layouts...' },
+  { pct: 76, label: 'Building PDF pages...' },
+  { pct: 91, label: 'Saving PDF file...' }
+];
+var stepIdx = 0, fakeTimer = null;
+
+function tick() {
+  if (stepIdx < STEPS.length) {
+    var s = STEPS[stepIdx++];
+    setProgress(s.pct, s.label);
+    var delay = stepIdx < 3 ? 900 : stepIdx < 5 ? 1600 : 3200;
+    fakeTimer = setTimeout(tick, delay);
+  }
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+tick();
+
+fetch('/generate/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    clearTimeout(fakeTimer);
+    if (data.ok) {
+      setProgress(100, 'Done — redirecting...');
+      document.getElementById('gen-icon-wrap').innerHTML = '<div class="gen-done-icon"><i class="fa-solid fa-check"></i></div>';
+      document.getElementById('gen-title').textContent = 'PDF Generated';
+      document.getElementById('gen-sub').textContent = 'Redirecting to results...';
+      setTimeout(function() { window.location.href = data.redirect || '/result/'; }, 700);
+    } else {
+      setProgress(0, 'Generation failed.');
+      document.getElementById('progress-bar').style.background = 'var(--danger)';
+      document.getElementById('gen-icon-wrap').innerHTML = '<div class="gen-fail-icon"><i class="fa-solid fa-xmark"></i></div>';
+      document.getElementById('gen-title').textContent = 'Generation Failed';
+      document.getElementById('gen-sub').textContent = 'An error occurred. See the details below.';
+      var log = document.getElementById('gen-error-log');
+      log.textContent = data.error || 'Unknown error.';
+      log.style.display = 'block';
+      document.getElementById('gen-error-actions').style.display = 'flex';
+    }
+  })
+  .catch(function(err) {
+    clearTimeout(fakeTimer);
+    setProgress(0, 'Network error.');
+    document.getElementById('gen-title').textContent = 'Connection Error';
+    document.getElementById('gen-sub').textContent = 'Could not reach the server. Please try again.';
+    var log = document.getElementById('gen-error-log');
+    log.textContent = String(err);
+    log.style.display = 'block';
+    document.getElementById('gen-error-actions').style.display = 'flex';
+  });
+</script>
+{% endblock %}

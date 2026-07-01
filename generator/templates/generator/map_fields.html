@@ -1,0 +1,81 @@
+{% extends 'generator/base.html' %}
+{% load generator_extras %}
+{% block title %}Map Fields — ID Card Generator{% endblock %}
+
+{% block stepper %}
+<div class="stepper">
+  <div class="step done"><div class="step-num"><i class="fa-solid fa-check"></i></div><span>Upload</span></div>
+  <div class="step-sep"></div>
+  <div class="step active"><div class="step-num">2</div><span>Map Fields</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">3</div><span>Preview</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">4</div><span>Design</span></div>
+  <div class="step-sep"></div>
+  <div class="step"><div class="step-num">5</div><span>Generate</span></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-title"><i class="fa-solid fa-table-columns"></i> Map Excel Columns</div>
+  <div class="card-subtitle">Match each required ID card field to the corresponding column in your Excel file</div>
+
+  <div class="info-bar">
+    <div class="ib-item"><i class="fa-solid fa-file-excel"></i> <span>File:</span> <span class="ib-val">{{ excel_name }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-users"></i> <span>Rows:</span> <span class="ib-val">{{ row_count }}</span></div>
+    <div class="ib-item"><i class="fa-solid fa-table-cells"></i> <span>Columns found:</span> <span class="ib-val">{{ excel_columns|length }}</span></div>
+  </div>
+
+  <div class="alert alert-info">
+    <i class="fa-solid fa-circle-info"></i>
+    <span>Exact matches are pre-selected. Use the dropdowns to fix any unmatched fields. Select <em>— skip —</em> to leave a field empty.</span>
+  </div>
+
+  <form method="post" action="{% url 'map_fields' %}">
+    {% csrf_token %}
+    <div class="table-wrapper" style="margin-bottom:1.5rem">
+      <table class="map-table">
+        <thead>
+          <tr>
+            <th style="width:180px">Required Field</th>
+            <th>Map to Excel Column</th>
+            <th style="width:110px">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for field in required_fields %}
+          <tr {% if not auto_map|get_item:field %}class="unmatched"{% endif %}>
+            <td><strong>{{ field }}</strong></td>
+            <td>
+              <select name="map_{{ field }}" class="form-control" style="max-width:320px">
+                <option value="__skip__">— skip —</option>
+                {% for col in excel_columns %}
+                <option value="{{ col }}" {% if auto_map|get_item:field == col %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              {% if auto_map|get_item:field %}
+                <span class="match-badge"><i class="fa-solid fa-check"></i> matched</span>
+              {% else %}
+                <span class="miss-badge"><i class="fa-solid fa-triangle-exclamation"></i> unmatched</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; gap:.85rem; flex-wrap:wrap">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-arrow-right"></i> Continue to Preview
+      </button>
+      <a href="{% url 'upload' %}" class="btn btn-outline">
+        <i class="fa-solid fa-arrow-left"></i> Re-upload
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
