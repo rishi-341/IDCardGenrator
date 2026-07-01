@@ -16,7 +16,7 @@ WORKDIR /app
 # ── Python deps ───────────────────────────────────────────────────────────────
 # Copy requirements first so Docker caches this layer when code-only changes occur
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # ── Copy project ──────────────────────────────────────────────────────────────
 COPY . .
